@@ -1,2 +1,2 @@
 # TypeScript_Estudo
-Reposiótio para estudos de TypeScript.
+Repositório para estudos de TypeScript.
