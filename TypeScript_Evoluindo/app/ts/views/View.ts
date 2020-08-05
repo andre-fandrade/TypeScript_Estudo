@@ -1,28 +1,25 @@
-import {logarTempoDeExecucao} from "../helpers/decorators/logarTempoDeExecucao";
+import { logarTempoDeExecucao } from '../helpers/decorators/index';
 
 export abstract class View<T> {
 
-    private _element: JQuery;
+    protected _elemento: JQuery;
     private _escapar: boolean;
 
-    // tornando  o parâmetro opcional com (?)!
     constructor(seletor: string, escapar: boolean = false) {
 
-        this._element = $(seletor);
+        this._elemento = $(seletor);
         this._escapar = escapar;
     }
 
     @logarTempoDeExecucao()
-    update(param: T): void {
+    update(model: T) {
 
-        // Escapando problemas como ameaças de códigos maliciosos emm <script>
-        let template = this.template(param)
-        if(this._escapar) {
-            template = template.replace(/<script>[\s\S]*?<\/script>/, '');
-        }
-        this._element.html(template);
+        let template = this.template(model);
+        if(this._escapar)
+            template = template.replace(/<script>[\s\S]*?<\/script>/g, '');
+        this._elemento.html(template);
     }
 
-    abstract template(param: T): string;
+    abstract template(model: T): string;
 
 }

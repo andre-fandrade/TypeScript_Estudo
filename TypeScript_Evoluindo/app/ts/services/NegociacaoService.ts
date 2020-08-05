@@ -1,21 +1,23 @@
-import {Negociacao, NegociacaoParcial} from "../models/index";
-
+import { Negociacao, NegociacaoParcial } from '../models/index';
 export class NegociacaoService {
 
-    obterNegociacoes(handler: ResponseHandler): Promise<Negociacao[]> {
+    obterNegociacoes(handler: HandlerFunction): Promise<Negociacao[]> {
 
         return fetch('http://localhost:5000/api/negocios')
             .then(res => handler(res))
             .then(res => res.json())
-            .then((dados: NegociacaoParcial[]) =>
-                dados.map(dado => new Negociacao(new Date(), dado.vezes, dado.montante))
+            .then((dados: NegociacaoParcial[]) => 
+                dados
+                    .map(dado => new Negociacao(new Date(), dado.vezes, dado.montante))     
             )
-            .catch(err => console.log(err));
-
+            .catch(err => {
+                console.log(err);
+                throw new Error('Não foi possível importar as negociações');
+            });
     }
 }
 
-export interface ResponseHandler {
+export interface HandlerFunction {
 
     (res: Response): Response
 }

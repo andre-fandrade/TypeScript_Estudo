@@ -6,12 +6,14 @@ System.register([], function (exports_1, context_1) {
             let elemento;
             const getter = function () {
                 if (!elemento) {
-                    console.log(`buscando ${seletor} para injetar em ${key}`);
+                    console.log(`buscando  ${seletor} para injetar em ${key}`);
                     elemento = $(seletor);
                 }
                 return elemento;
             };
-            Object.defineProperty(target, key, { get: getter });
+            Object.defineProperty(target, key, {
+                get: getter
+            });
         };
     }
     exports_1("domInject", domInject);

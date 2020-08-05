@@ -1,92 +1,99 @@
-import {NegociacoesView, MensagemView} from "../views/index";
-import {Negociacao, Negociacoes} from "../models/index";
-import {logarTempoDeExecucao, throttle, domInject} from "../helpers/decorators/index";
-import {NegociacaoService} from "../services/index";
+import { NegociacoesView, MensagemView } from '../views/index';
+import { Negociacao, Negociacoes } from '../models/index';
+import { domInject, throttle } from '../helpers/decorators/index';
+import { NegociacaoParcial } from '../models/index';
+import { NegociacaoService } from '../services/index';
+import { imprime } from '../helpers/index';
 
 export class NegociacaoController {
 
-    @domInject("#data")
+    @domInject('#data')
     private _inputData: JQuery;
-    @domInject("#quantidade")
+
+    @domInject('#quantidade')
     private _inputQuantidade: JQuery;
-    @domInject("#valor")
+    
+    @domInject('#valor')
     private _inputValor: JQuery;
+    
     private _negociacoes = new Negociacoes();
-    private _negociacoesView = new NegociacoesView('#NegociacoesView');
-    private _mensagemView = new MensagemView('#MensagemView');
+    private _negociacoesView = new NegociacoesView('#negociacoesView');
+    private _mensagemView = new MensagemView('#mensagemView');
+
     private _service = new NegociacaoService();
-
-    //Element é um tipo genérico e HTMLInputElement é um tipo especifico.
-    // Por isso no meu construtor eu tenho que fazer um Casting <HTMLInputElement>
-
+    
     constructor() {
-
         this._negociacoesView.update(this._negociacoes);
     }
 
-    @throttle(1000)
-    adiciona(event: Event) : void {
-
-        event.preventDefault();
-
+    @throttle()
+    adiciona() {
         let data = new Date(this._inputData.val().replace(/-/g, ','));
 
-        if (!this._ehDiaUtil(data)) {
-            return this._mensagemView.update('Negociação somente em dias de semana.');
+        if(!this._ehDiaUtil(data)) {
+
+            this._mensagemView.update('Somente negociações em dias úteis, por favor!');
+            return 
         }
 
         const negociacao = new Negociacao(
-            data,
+            data, 
             parseInt(this._inputQuantidade.val()),
             parseFloat(this._inputValor.val())
         );
 
         this._negociacoes.adiciona(negociacao);
 
+        imprime(negociacao, this._negociacoes);
+
         this._negociacoesView.update(this._negociacoes);
-
-        this._mensagemView.update('Negociação criada com sucesso!');
-
-        /*this._negociacoes.getArray().forEach(negociacao => {
-
-            console.log(negociacao.data);
-            console.log(negociacao.quantidade);
-            console.log(negociacao.valor);
-        });*/
-
+        this._mensagemView.update('Negociação adicionada com sucesso!');
     }
 
-    @logarTempoDeExecucao()
-    private _ehDiaUtil(data: Date): boolean {
-        return data.getDay() != diaDaSemana.Domingo || data.getDay() != diaDaSemana.Sabado;
+    private _ehDiaUtil(data: Date) {
+
+        return data.getDay() != DiaDaSemana.Sabado && data.getDay() != DiaDaSemana.Domingo;
     }
 
-    @throttle(1000)
-    importaDados() {
+    @throttle()
+    async importaDados() {
 
+        try {
 
-        this._service
-            .obterNegociacoes(res => {
-                if(res.ok) {
-                    return res;
-                } else {
-                    throw new Error(res.statusText);
-                }
-            })
-            .then(negociacoes => {
-                negociacoes.forEach(negociacao =>
-                    this._negociacoes.adiciona(negociacao));
-                this._negociacoesView.update(this._negociacoes);
-            });
+            const negociacoesParaImportar = await this._service
+                .obterNegociacoes(res => {
+
+                    if(res.ok) {
+                        return res;
+                    } else {
+                        throw new Error(res.statusText);
+                    }
+                });
+
+            const negociacoesJaImportadas = this._negociacoes.paraArray();
+
+            negociacoesParaImportar
+                .filter(negociacao => 
+                    !negociacoesJaImportadas.some(jaImportada => 
+                        negociacao.ehIgual(jaImportada)))
+                .forEach(negociacao => 
+                this._negociacoes.adiciona(negociacao));
+
+            this._negociacoesView.update(this._negociacoes);
+
+        } catch(err) {
+            this._mensagemView.update(err.message);
+        }
     }
 }
 
-enum diaDaSemana {
-    Domingo,
-    Segunda,
-    Terca,
-    Quarta,
-    Quinta,
-    Sexta,
+enum DiaDaSemana {
+
+    Domingo, 
+    Segunda, 
+    Terca, 
+    Quarta, 
+    Quinta, 
+    Sexta, 
     Sabado
 }

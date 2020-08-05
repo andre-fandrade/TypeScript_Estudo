@@ -1,0 +1,1 @@
+ descompacte-o e execute dentro da pasta ts_node o comando npm install. Depois, npm run compile para compilar o arquivo. Por fim, entre dentro de ts_node/js e execute o arquivo local.js com a instrução node local.

@@ -1,38 +1,30 @@
-export class Negociacao {
+import { MeuObjeto } from './MeuObjeto';
 
-    //Propriedades
-    //private _data: Date;
-    //private _quantidade: number;
-    //private _valor: number;
+export class Negociacao implements MeuObjeto<Negociacao> {
+    
+    constructor(readonly data: Date, readonly quantidade: number, readonly valor: number) {
 
-    constructor(
-        //private _data: Date,
-        //private _quantidade: number,
-        //private _valor: number
-        readonly data: Date,
-        readonly quantidade: number,
-        readonly valor: number
-    ) {
-        // _ é uma convenção onde se espera uma varável private
-        // que não pode ser acessada.
-        //this._data = data;
-        //this._quantidade = quantidade;
-        //this._valor = valor;
     }
 
     get volume() {
+
         return this.quantidade * this.valor;
     }
 
-    /*get data() {
-        return this._data;
+    paraTexto(): void {
+        console.log('Impressão');
+        console.log(
+            `Data: ${this.data}
+            Quantidade: ${this.quantidade}, 
+            Valor: ${this.valor}, 
+            Volume: ${this.volume}`
+        );
     }
 
-    get quantidade() {
-        return this._quantidade;
-    }
+    ehIgual(negociacao: Negociacao): boolean {
 
-    get valor() {
-        return this._valor;
-    }*/
+        return this.data.getDate() == negociacao.data.getDate()
+            && this.data.getMonth() == negociacao.data.getMonth() 
+            && this.data.getFullYear() == negociacao.data.getFullYear();
+    }
 }
